@@ -1,27 +1,76 @@
 <!doctype html>
 <html lang="fr">
-    <head>
-        <meta charset="utf-8" />
-        <title>TwoZeroFourEight - The Game</title>
-        <style>
-            html,
-            body,
-            canvas {
-                margin: 0;
-                padding: 0;
-                width: 100%;
-                height: 100%;
-                overflow: hidden;
-                background: #222;
-                display: block;
+
+<head>
+    <meta charset="utf-8" />
+    <title>2048 — The Game</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background: rgb(121, 163, 189);
+            /* Empêche le scroll sur mobile avec les flèches */
+            overscroll-behavior: none;
+            touch-action: none;
+            /* Flexbox pour centrer le canvas */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        canvas {
+            display: block;
+            /* Rendre le canvas focusable pour la capture clavier */
+            outline: none;
+            /* Taille max tout en restant centré */
+            max-width: 100vw;
+            max-height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Le dossier assets/ est copié tel quel pour que Bevy puisse charger les ressources -->
+    <link data-trunk rel="copy-dir" href="assets" />
+
+    <script>
+        // Focus automatique du canvas pour capturer les événements clavier
+        function focusCanvas() {
+            const canvas = document.querySelector("canvas");
+            if (canvas) {
+                canvas.focus();
+                // tabindex=-1 permet focus() sans être dans l'ordre de tabulation
+                if (!canvas.hasAttribute("tabindex")) {
+                    canvas.setAttribute("tabindex", "-1");
+                }
             }
-        </style>
-    </head>
-    <body>
-        <canvas id="glcanvas" tabindex="1"></canvas>
-        <script src="https://not-fl3.github.io/miniquad-samples/mq_js_bundle.js"></script>
-        <script>
-            load("TwoZeroFourEight.wasm");
-        </script>
-    </body>
+        }
+
+        // Essayer au chargement et périodiquement (le canvas Bevy peut arriver après le DOM ready)
+        document.addEventListener("DOMContentLoaded", () => {
+            focusCanvas();
+            // Réessayer après un délai (le temps que Bevy crée le canvas)
+            setTimeout(focusCanvas, 500);
+            setTimeout(focusCanvas, 2000);
+        });
+
+        // Refocus au clic n'importe où sur la page
+        document.addEventListener("click", (e) => {
+            // Si on clique directement sur le canvas, focus
+            // Si on clique ailleurs, focus aussi (pour éviter de perdre le focus)
+            focusCanvas();
+        });
+
+        // Observer les mutations pour détecter quand le canvas est ajouté
+        const observer = new MutationObserver(() => {
+            focusCanvas();
+        });
+        observer.observe(document.body, { childList: true, subtree: true });
+    </script>
+</body>
+
 </html>

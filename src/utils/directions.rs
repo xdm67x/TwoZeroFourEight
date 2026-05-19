@@ -7,7 +7,8 @@ pub enum Direction {
     Down,
     Left,
     Right,
-    None, // Aucune direction (état par défaut)
+    None,    // Aucune direction (état par défaut, pas de mouvement ce tour)
+    Restart, // Le joueur veut recommencer la partie
 }
 
 impl Default for Direction {

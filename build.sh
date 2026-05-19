@@ -1,27 +1,22 @@
 #!/bin/bash
+# =============================================================================
+# Script de build et de développement pour TwoZeroFourEight (WASM)
+#
+# Pré-requis :
+#   1. Installer Trunk : cargo install trunk
+#   2. Ajouter la cible WASM : rustup target add wasm32-unknown-unknown
+#
+# Usage :
+#   ./build.sh          → build + serveur de dev avec hot-reload (port 8080)
+#   ./build.sh release  → build optimisé pour la production (dossier dist/)
+# =============================================================================
+set -e
 
-mkdir -p dist
-
-# Build the wasm binary
-build() {
-    cargo build --target wasm32-unknown-unknown --release
-    cp target/wasm32-unknown-unknown/release/TwoZeroFourEight.wasm dist/TwoZeroFourEight.wasm
-    cp index.html dist/
-}
-
-build
-basic-http-server dist --port 8080
-SERVER_PID=$!
-
-cleanup() {
-    kill $SERVER_PID
-    exit 0
-}
-
-trap cleanup SIGINT
-
-find src index.html Cargo.toml -type f | entr -r bash -c '
-    build
-'
-
-cleanup
+if [ "$1" = "release" ]; then
+    echo "🔨 Build production (wasm-release)..."
+    trunk build --release --public-url /TwoZeroFourEight/
+    echo "✅ Build terminé → dossier dist/"
+else
+    echo "🚀 Serveur de développement sur http://localhost:8080"
+    trunk serve --port 8080
+fi
