@@ -2,6 +2,7 @@
 pub mod resources;
 mod systems;
 
+use crate::input::InputSet;
 use crate::states::AppState;
 use bevy::prelude::*;
 use resources::{Board, Score};
@@ -16,11 +17,13 @@ impl Plugin for BoardPlugin {
             .add_systems(Startup, spawn_initial_tiles)
             .add_systems(
                 Update,
-                process_turn.run_if(
-                    in_state(AppState::InGame)
-                        .or(in_state(AppState::Won))
-                        .or(in_state(AppState::GameOver)),
-                ),
+                process_turn
+                    .after(InputSet)
+                    .run_if(
+                        in_state(AppState::InGame)
+                            .or(in_state(AppState::Won))
+                            .or(in_state(AppState::GameOver)),
+                    ),
             );
     }
 }

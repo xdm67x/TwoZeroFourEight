@@ -6,3 +6,6 @@ pub struct ScoreText;
 
 #[derive(Component)]
 pub struct OverlayText;
+
+#[derive(Component)]
+pub struct OverlayPanel;

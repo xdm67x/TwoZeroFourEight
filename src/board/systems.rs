@@ -95,8 +95,9 @@ fn apply_move(
     match direction {
         Direction::Left => {
             for row in 0..BOARD_SIZE {
+                let original: Vec<u32> = (0..BOARD_SIZE).map(|col| grid[row][col].unwrap_or(0)).collect();
                 let line: Vec<u32> = (0..BOARD_SIZE).filter_map(|col| grid[row][col]).collect();
-                let (merged, pts, changed) = compact_and_merge(line);
+                let (merged, pts, changed) = compact_and_merge(line, &original);
                 if changed { moved = true; }
                 points += pts;
                 for (col, &val) in merged.iter().enumerate() {
@@ -106,8 +107,9 @@ fn apply_move(
         }
         Direction::Right => {
             for row in 0..BOARD_SIZE {
+                let original: Vec<u32> = (0..BOARD_SIZE).rev().map(|col| grid[row][col].unwrap_or(0)).collect();
                 let line: Vec<u32> = (0..BOARD_SIZE).rev().filter_map(|col| grid[row][col]).collect();
-                let (merged, pts, changed) = compact_and_merge(line);
+                let (merged, pts, changed) = compact_and_merge(line, &original);
                 if changed { moved = true; }
                 points += pts;
                 for (i, &val) in merged.iter().enumerate() {
@@ -117,8 +119,9 @@ fn apply_move(
         }
         Direction::Up => {
             for col in 0..BOARD_SIZE {
+                let original: Vec<u32> = (0..BOARD_SIZE).map(|row| grid[row][col].unwrap_or(0)).collect();
                 let line: Vec<u32> = (0..BOARD_SIZE).filter_map(|row| grid[row][col]).collect();
-                let (merged, pts, changed) = compact_and_merge(line);
+                let (merged, pts, changed) = compact_and_merge(line, &original);
                 if changed { moved = true; }
                 points += pts;
                 for (row, &val) in merged.iter().enumerate() {
@@ -128,8 +131,9 @@ fn apply_move(
         }
         Direction::Down => {
             for col in 0..BOARD_SIZE {
+                let original: Vec<u32> = (0..BOARD_SIZE).rev().map(|row| grid[row][col].unwrap_or(0)).collect();
                 let line: Vec<u32> = (0..BOARD_SIZE).rev().filter_map(|row| grid[row][col]).collect();
-                let (merged, pts, changed) = compact_and_merge(line);
+                let (merged, pts, changed) = compact_and_merge(line, &original);
                 if changed { moved = true; }
                 points += pts;
                 for (i, &val) in merged.iter().enumerate() {
@@ -143,13 +147,7 @@ fn apply_move(
     (new_grid, points, moved)
 }
 
-fn compact_and_merge(line: Vec<u32>) -> (Vec<u32>, u32, bool) {
-    let original = {
-        let mut v = line.clone();
-        while v.len() < BOARD_SIZE { v.push(0); }
-        v
-    };
-
+fn compact_and_merge(line: Vec<u32>, original: &[u32]) -> (Vec<u32>, u32, bool) {
     let mut compacted: Vec<u32> = line.into_iter().filter(|&v| v != 0).collect();
     let mut points = 0u32;
     let mut i = 0;
@@ -277,7 +275,8 @@ mod tests {
 
     #[test]
     fn compact_merge_empty_line() {
-        let (result, pts, changed) = compact_and_merge(vec![]);
+        let original = vec![0, 0, 0, 0];
+        let (result, pts, changed) = compact_and_merge(vec![], &original);
         assert_eq!(result, vec![0, 0, 0, 0]);
         assert_eq!(pts, 0);
         assert!(!changed);
@@ -285,7 +284,8 @@ mod tests {
 
     #[test]
     fn compact_merge_no_change() {
-        let (result, pts, changed) = compact_and_merge(vec![2, 4, 8, 16]);
+        let original = vec![2, 4, 8, 16];
+        let (result, pts, changed) = compact_and_merge(vec![2, 4, 8, 16], &original);
         assert_eq!(result, vec![2, 4, 8, 16]);
         assert_eq!(pts, 0);
         assert!(!changed);
@@ -293,7 +293,8 @@ mod tests {
 
     #[test]
     fn compact_merge_simple_pair() {
-        let (result, pts, changed) = compact_and_merge(vec![2, 2]);
+        let original = vec![2, 2, 0, 0];
+        let (result, pts, changed) = compact_and_merge(vec![2, 2], &original);
         assert_eq!(result, vec![4, 0, 0, 0]);
         assert_eq!(pts, 4);
         assert!(changed);
@@ -301,7 +302,8 @@ mod tests {
 
     #[test]
     fn compact_merge_with_gaps() {
-        let (result, pts, changed) = compact_and_merge(vec![2, 2, 4]);
+        let original = vec![2, 2, 4, 0];
+        let (result, pts, changed) = compact_and_merge(vec![2, 2, 4], &original);
         assert_eq!(result, vec![4, 4, 0, 0]);
         assert_eq!(pts, 4);
         assert!(changed);
@@ -309,9 +311,20 @@ mod tests {
 
     #[test]
     fn compact_merge_no_double_merge() {
-        let (result, pts, changed) = compact_and_merge(vec![2, 2, 2, 2]);
+        let original = vec![2, 2, 2, 2];
+        let (result, pts, changed) = compact_and_merge(vec![2, 2, 2, 2], &original);
         assert_eq!(result, vec![4, 4, 0, 0]);
         assert_eq!(pts, 8);
         assert!(changed);
+    }
+
+    #[test]
+    fn compact_merge_slide_without_merge() {
+        // [None, 2, None, 4] → original [0, 2, 0, 4], résultat attendu [2, 4, 0, 0]
+        let original = vec![0, 2, 0, 4];
+        let (result, pts, changed) = compact_and_merge(vec![2, 4], &original);
+        assert_eq!(result, vec![2, 4, 0, 0]);
+        assert_eq!(pts, 0);
+        assert!(changed); // les tuiles ont bougé même sans merge
     }
 }
