@@ -4,6 +4,21 @@ use crate::states::AppState;
 use bevy::input::keyboard::KeyCode;
 use bevy::prelude::*;
 
+const SWIPE_THRESHOLD: f32 = 30.0;
+
+fn swipe_direction(start: Vec2, end: Vec2) -> Option<Direction> {
+    let delta = end - start;
+    if delta.length() < SWIPE_THRESHOLD {
+        return None;
+    }
+    if delta.x.abs() > delta.y.abs() {
+        Some(if delta.x > 0.0 { Direction::Right } else { Direction::Left })
+    } else {
+        // Touch screen Y increases downward: negative delta.y = finger moved up
+        Some(if delta.y < 0.0 { Direction::Up } else { Direction::Down })
+    }
+}
+
 pub fn handle_input(
     mut direction: ResMut<Direction>,
     keyboard_input: Res<ButtonInput<KeyCode>>,
@@ -36,5 +51,50 @@ pub fn handle_input(
         || keyboard_input.just_pressed(KeyCode::KeyS)
     {
         *direction = Direction::Down;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use bevy::math::Vec2;
+
+    #[test]
+    fn swipe_left() {
+        let dir = swipe_direction(Vec2::new(200.0, 100.0), Vec2::new(150.0, 102.0));
+        assert_eq!(dir, Some(Direction::Left));
+    }
+
+    #[test]
+    fn swipe_right() {
+        let dir = swipe_direction(Vec2::new(100.0, 100.0), Vec2::new(160.0, 98.0));
+        assert_eq!(dir, Some(Direction::Right));
+    }
+
+    #[test]
+    fn swipe_up() {
+        // Screen Y increases downward: swipe up → delta.y < 0
+        let dir = swipe_direction(Vec2::new(100.0, 200.0), Vec2::new(102.0, 140.0));
+        assert_eq!(dir, Some(Direction::Up));
+    }
+
+    #[test]
+    fn swipe_down() {
+        // Screen Y increases downward: swipe down → delta.y > 0
+        let dir = swipe_direction(Vec2::new(100.0, 100.0), Vec2::new(98.0, 160.0));
+        assert_eq!(dir, Some(Direction::Down));
+    }
+
+    #[test]
+    fn tap_too_short_ignored() {
+        let dir = swipe_direction(Vec2::new(100.0, 100.0), Vec2::new(110.0, 100.0));
+        assert_eq!(dir, None);
+    }
+
+    #[test]
+    fn diagonal_resolves_to_dominant_axis() {
+        // dx=60 > dy=20 → horizontal
+        let dir = swipe_direction(Vec2::new(100.0, 100.0), Vec2::new(160.0, 120.0));
+        assert_eq!(dir, Some(Direction::Right));
     }
 }
