@@ -60,6 +60,7 @@ pub fn handle_touch_input(
     mut direction: ResMut<Direction>,
     mut touch_events: MessageReader<TouchInput>,
     mut tracked: Local<Option<(u64, Vec2)>>,
+    state: Res<State<AppState>>,
 ) {
     for event in touch_events.read() {
         match event.phase {
@@ -72,8 +73,10 @@ pub fn handle_touch_input(
                 if let Some((id, start_pos)) = *tracked {
                     if event.id == id {
                         *tracked = None;
-                        if let Some(dir) = swipe_direction(start_pos, event.position) {
-                            *direction = dir;
+                        if *state.get() == AppState::InGame {
+                            if let Some(dir) = swipe_direction(start_pos, event.position) {
+                                *direction = dir;
+                            }
                         }
                     }
                 }

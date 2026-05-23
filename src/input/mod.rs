@@ -29,7 +29,12 @@ impl Plugin for InputPlugin {
                 Update,
                 handle_touch_input
                     .in_set(InputSet)
-                    .run_if(in_state(AppState::InGame)),
+                    .after(handle_input)
+                    .run_if(
+                        in_state(AppState::InGame)
+                            .or(in_state(AppState::Won))
+                            .or(in_state(AppState::GameOver)),
+                    ),
             );
     }
 }
