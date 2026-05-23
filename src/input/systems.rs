@@ -1,14 +1,16 @@
 // src/input/systems.rs
 use crate::input::resources::Direction;
 use crate::states::AppState;
+use bevy::ecs::message::MessageReader;
 use bevy::input::keyboard::KeyCode;
+use bevy::input::touch::{TouchInput, TouchPhase};
 use bevy::prelude::*;
 
 const SWIPE_THRESHOLD: f32 = 30.0;
 
 fn swipe_direction(start: Vec2, end: Vec2) -> Option<Direction> {
     let delta = end - start;
-    if delta.length() < SWIPE_THRESHOLD {
+    if delta.length_squared() < SWIPE_THRESHOLD * SWIPE_THRESHOLD {
         return None;
     }
     if delta.x.abs() > delta.y.abs() {
@@ -51,6 +53,38 @@ pub fn handle_input(
         || keyboard_input.just_pressed(KeyCode::KeyS)
     {
         *direction = Direction::Down;
+    }
+}
+
+pub fn handle_touch_input(
+    mut direction: ResMut<Direction>,
+    mut touch_events: MessageReader<TouchInput>,
+    mut tracked: Local<Option<(u64, Vec2)>>,
+) {
+    for event in touch_events.read() {
+        match event.phase {
+            TouchPhase::Started => {
+                if tracked.is_none() {
+                    *tracked = Some((event.id, event.position));
+                }
+            }
+            TouchPhase::Ended => {
+                if let Some((id, start_pos)) = *tracked {
+                    if event.id == id {
+                        *tracked = None;
+                        if let Some(dir) = swipe_direction(start_pos, event.position) {
+                            *direction = dir;
+                        }
+                    }
+                }
+            }
+            TouchPhase::Canceled => {
+                if tracked.map_or(false, |(id, _)| id == event.id) {
+                    *tracked = None;
+                }
+            }
+            _ => {}
+        }
     }
 }
 
