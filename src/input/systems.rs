@@ -14,10 +14,18 @@ fn swipe_direction(start: Vec2, end: Vec2) -> Option<Direction> {
         return None;
     }
     if delta.x.abs() > delta.y.abs() {
-        Some(if delta.x > 0.0 { Direction::Right } else { Direction::Left })
+        Some(if delta.x > 0.0 {
+            Direction::Right
+        } else {
+            Direction::Left
+        })
     } else {
         // Touch screen Y increases downward: negative delta.y = finger moved up
-        Some(if delta.y < 0.0 { Direction::Up } else { Direction::Down })
+        Some(if delta.y < 0.0 {
+            Direction::Up
+        } else {
+            Direction::Down
+        })
     }
 }
 
