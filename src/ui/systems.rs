@@ -11,14 +11,22 @@ pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands.spawn((
         Text2d::new("2048"),
-        TextFont { font: font.clone(), font_size: 52.0, ..default() },
+        TextFont {
+            font: font.clone(),
+            font_size: 52.0,
+            ..default()
+        },
         TextColor(Color::srgb(0.929, 0.761, 0.180)),
         Transform::from_xyz(0.0, 305.0, 10.0),
     ));
 
     commands.spawn((
         Text2d::new("Score: 0"),
-        TextFont { font: font.clone(), font_size: 28.0, ..default() },
+        TextFont {
+            font: font.clone(),
+            font_size: 28.0,
+            ..default()
+        },
         TextColor(Color::srgb(0.976, 0.965, 0.945)),
         Transform::from_xyz(0.0, 255.0, 10.0),
         ScoreText,
@@ -37,7 +45,11 @@ pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
 
     commands.spawn((
         Text2d::new(""),
-        TextFont { font: font.clone(), font_size: 36.0, ..default() },
+        TextFont {
+            font: font.clone(),
+            font_size: 36.0,
+            ..default()
+        },
         TextColor(Color::srgb(0.976, 0.965, 0.945)),
         Transform::from_xyz(0.0, 0.0, 100.0),
         OverlayText,
@@ -65,7 +77,11 @@ pub fn update_ui(
     let show_overlay = matches!(state.get(), AppState::Won | AppState::GameOver);
 
     if let Some(mut panel_vis) = panel_query.iter_mut().next() {
-        *panel_vis = if show_overlay { Visibility::Visible } else { Visibility::Hidden };
+        *panel_vis = if show_overlay {
+            Visibility::Visible
+        } else {
+            Visibility::Hidden
+        };
     }
 
     if let Some((mut overlay_text, mut visibility)) = overlay_query.iter_mut().next() {
@@ -75,15 +91,11 @@ pub fn update_ui(
             }
             AppState::Won => {
                 *visibility = Visibility::Visible;
-                overlay_text.0 = format!(
-                    "You Win!\nScore: {}\n\nR to restart",
-                    score.value
-                );
+                overlay_text.0 = format!("You Win!\nScore: {}\n\nR to restart", score.value);
             }
             AppState::GameOver => {
                 *visibility = Visibility::Visible;
-                overlay_text.0 =
-                    format!("Game Over\nScore: {}\n\nR to restart", score.value);
+                overlay_text.0 = format!("Game Over\nScore: {}\n\nR to restart", score.value);
             }
         }
     }

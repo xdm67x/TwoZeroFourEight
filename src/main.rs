@@ -8,8 +8,8 @@ mod states;
 mod ui;
 
 use bevy::prelude::*;
-use camera::CameraPlugin;
 use board::BoardPlugin;
+use camera::CameraPlugin;
 use input::InputPlugin;
 use render::RenderPlugin;
 use states::AppState;
@@ -19,6 +19,12 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins)
         .init_state::<AppState>()
-        .add_plugins((CameraPlugin, RenderPlugin, BoardPlugin, InputPlugin, UIPlugin))
+        .add_plugins((
+            CameraPlugin,
+            RenderPlugin,
+            BoardPlugin,
+            InputPlugin,
+            UIPlugin,
+        ))
         .run();
 }

@@ -77,12 +77,7 @@ mod tests {
 
     #[test]
     fn has_moves_full_no_merges() {
-        let grid = grid_from([
-            [2, 4, 2, 4],
-            [4, 2, 4, 2],
-            [2, 4, 2, 4],
-            [4, 2, 4, 2],
-        ]);
+        let grid = grid_from([[2, 4, 2, 4], [4, 2, 4, 2], [2, 4, 2, 4], [4, 2, 4, 2]]);
         assert!(!has_moves(&grid));
     }
 

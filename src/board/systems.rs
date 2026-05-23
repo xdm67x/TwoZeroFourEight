@@ -95,49 +95,81 @@ fn apply_move(
     match direction {
         Direction::Left => {
             for row in 0..BOARD_SIZE {
-                let original: Vec<u32> = (0..BOARD_SIZE).map(|col| grid[row][col].unwrap_or(0)).collect();
+                let original: Vec<u32> = (0..BOARD_SIZE)
+                    .map(|col| grid[row][col].unwrap_or(0))
+                    .collect();
                 let line: Vec<u32> = (0..BOARD_SIZE).filter_map(|col| grid[row][col]).collect();
                 let (merged, pts, changed) = compact_and_merge(line, &original);
-                if changed { moved = true; }
+                if changed {
+                    moved = true;
+                }
                 points += pts;
                 for (col, &val) in merged.iter().enumerate() {
-                    if val > 0 { new_grid[row][col] = Some(val); }
+                    if val > 0 {
+                        new_grid[row][col] = Some(val);
+                    }
                 }
             }
         }
         Direction::Right => {
             for row in 0..BOARD_SIZE {
-                let original: Vec<u32> = (0..BOARD_SIZE).rev().map(|col| grid[row][col].unwrap_or(0)).collect();
-                let line: Vec<u32> = (0..BOARD_SIZE).rev().filter_map(|col| grid[row][col]).collect();
+                let original: Vec<u32> = (0..BOARD_SIZE)
+                    .rev()
+                    .map(|col| grid[row][col].unwrap_or(0))
+                    .collect();
+                let line: Vec<u32> = (0..BOARD_SIZE)
+                    .rev()
+                    .filter_map(|col| grid[row][col])
+                    .collect();
                 let (merged, pts, changed) = compact_and_merge(line, &original);
-                if changed { moved = true; }
+                if changed {
+                    moved = true;
+                }
                 points += pts;
                 for (i, &val) in merged.iter().enumerate() {
-                    if val > 0 { new_grid[row][BOARD_SIZE - 1 - i] = Some(val); }
+                    if val > 0 {
+                        new_grid[row][BOARD_SIZE - 1 - i] = Some(val);
+                    }
                 }
             }
         }
         Direction::Up => {
             for col in 0..BOARD_SIZE {
-                let original: Vec<u32> = (0..BOARD_SIZE).map(|row| grid[row][col].unwrap_or(0)).collect();
+                let original: Vec<u32> = (0..BOARD_SIZE)
+                    .map(|row| grid[row][col].unwrap_or(0))
+                    .collect();
                 let line: Vec<u32> = (0..BOARD_SIZE).filter_map(|row| grid[row][col]).collect();
                 let (merged, pts, changed) = compact_and_merge(line, &original);
-                if changed { moved = true; }
+                if changed {
+                    moved = true;
+                }
                 points += pts;
                 for (row, &val) in merged.iter().enumerate() {
-                    if val > 0 { new_grid[row][col] = Some(val); }
+                    if val > 0 {
+                        new_grid[row][col] = Some(val);
+                    }
                 }
             }
         }
         Direction::Down => {
             for col in 0..BOARD_SIZE {
-                let original: Vec<u32> = (0..BOARD_SIZE).rev().map(|row| grid[row][col].unwrap_or(0)).collect();
-                let line: Vec<u32> = (0..BOARD_SIZE).rev().filter_map(|row| grid[row][col]).collect();
+                let original: Vec<u32> = (0..BOARD_SIZE)
+                    .rev()
+                    .map(|row| grid[row][col].unwrap_or(0))
+                    .collect();
+                let line: Vec<u32> = (0..BOARD_SIZE)
+                    .rev()
+                    .filter_map(|row| grid[row][col])
+                    .collect();
                 let (merged, pts, changed) = compact_and_merge(line, &original);
-                if changed { moved = true; }
+                if changed {
+                    moved = true;
+                }
                 points += pts;
                 for (i, &val) in merged.iter().enumerate() {
-                    if val > 0 { new_grid[BOARD_SIZE - 1 - i][col] = Some(val); }
+                    if val > 0 {
+                        new_grid[BOARD_SIZE - 1 - i][col] = Some(val);
+                    }
                 }
             }
         }
@@ -159,7 +191,9 @@ fn compact_and_merge(line: Vec<u32>, original: &[u32]) -> (Vec<u32>, u32, bool) 
         }
         i += 1;
     }
-    while compacted.len() < BOARD_SIZE { compacted.push(0); }
+    while compacted.len() < BOARD_SIZE {
+        compacted.push(0);
+    }
 
     let changed = compacted != original;
     (compacted, points, changed)
@@ -206,7 +240,9 @@ pub fn spawn_random_tile(
             }
         }
     }
-    if empty_positions.is_empty() { return; }
+    if empty_positions.is_empty() {
+        return;
+    }
 
     let idx = rand::thread_rng().gen_range(0..empty_positions.len());
     let (row, col) = empty_positions[idx];
@@ -230,7 +266,10 @@ fn spawn_single_tile(
 
     commands
         .spawn((
-            Tile { value, merged: false },
+            Tile {
+                value,
+                merged: false,
+            },
             Position { row, col },
             Sprite {
                 color: bg_color,
@@ -242,7 +281,11 @@ fn spawn_single_tile(
         .with_children(|parent| {
             parent.spawn((
                 Text2d::new(value.to_string()),
-                TextFont { font: font_handle.clone(), font_size: FONT_SIZE, ..default() },
+                TextFont {
+                    font: font_handle.clone(),
+                    font_size: FONT_SIZE,
+                    ..default()
+                },
                 TextColor(text_color),
                 Transform::from_xyz(0.0, -4.0, 0.1),
             ));
@@ -254,18 +297,18 @@ fn tile_colors(value: u32) -> (Color, Color) {
     let text_dark = Color::srgb(0.467, 0.431, 0.396);
     let text_light = Color::srgb(0.976, 0.965, 0.945);
     match value {
-        2    => (Color::srgb(0.933, 0.894, 0.855), text_dark),
-        4    => (Color::srgb(0.929, 0.878, 0.784), text_dark),
-        8    => (Color::srgb(0.949, 0.694, 0.475), text_light),
-        16   => (Color::srgb(0.961, 0.584, 0.388), text_light),
-        32   => (Color::srgb(0.965, 0.486, 0.373), text_light),
-        64   => (Color::srgb(0.965, 0.369, 0.231), text_light),
-        128  => (Color::srgb(0.929, 0.812, 0.447), text_light),
-        256  => (Color::srgb(0.929, 0.800, 0.380), text_light),
-        512  => (Color::srgb(0.929, 0.784, 0.314), text_light),
+        2 => (Color::srgb(0.933, 0.894, 0.855), text_dark),
+        4 => (Color::srgb(0.929, 0.878, 0.784), text_dark),
+        8 => (Color::srgb(0.949, 0.694, 0.475), text_light),
+        16 => (Color::srgb(0.961, 0.584, 0.388), text_light),
+        32 => (Color::srgb(0.965, 0.486, 0.373), text_light),
+        64 => (Color::srgb(0.965, 0.369, 0.231), text_light),
+        128 => (Color::srgb(0.929, 0.812, 0.447), text_light),
+        256 => (Color::srgb(0.929, 0.800, 0.380), text_light),
+        512 => (Color::srgb(0.929, 0.784, 0.314), text_light),
         1024 => (Color::srgb(0.929, 0.773, 0.247), text_light),
         2048 => (Color::srgb(0.929, 0.761, 0.180), text_light),
-        _    => (Color::srgb(0.235, 0.227, 0.196), text_light),
+        _ => (Color::srgb(0.235, 0.227, 0.196), text_light),
     }
 }
 
