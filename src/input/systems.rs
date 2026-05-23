@@ -1,7 +1,7 @@
 // src/input/systems.rs
 use crate::input::resources::Direction;
 use crate::states::AppState;
-use bevy::ecs::prelude::MessageReader;
+use bevy::ecs::message::MessageReader;
 use bevy::input::keyboard::KeyCode;
 use bevy::input::touch::{TouchInput, TouchPhase};
 use bevy::prelude::*;
