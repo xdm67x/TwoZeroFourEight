@@ -1,10 +1,9 @@
 // src/ui/systems.rs
-use crate::board::resources::Score;
 use crate::states::AppState;
 use crate::ui::components::{OverlayPanel, OverlayText, ScoreText};
 use bevy::prelude::*;
 
-const GRID_SIZE: f32 = 460.0;
+const GRID_SIZE: f32 = 800.0;
 
 pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
     let font = asset_server.load("GoogleSans-Regular.ttf");
@@ -18,18 +17,6 @@ pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
         },
         TextColor(Color::srgb(0.929, 0.761, 0.180)),
         Transform::from_xyz(0.0, 305.0, 10.0),
-    ));
-
-    commands.spawn((
-        Text2d::new("Score: 0"),
-        TextFont {
-            font: font.clone(),
-            font_size: 28.0,
-            ..default()
-        },
-        TextColor(Color::srgb(0.976, 0.965, 0.945)),
-        Transform::from_xyz(0.0, 255.0, 10.0),
-        ScoreText,
     ));
 
     commands.spawn((
@@ -58,9 +45,7 @@ pub fn setup_ui(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 pub fn update_ui(
-    score: Res<Score>,
     state: Res<State<AppState>>,
-    mut score_query: Query<&mut Text2d, (With<ScoreText>, Without<OverlayText>)>,
     mut overlay_query: Query<
         (&mut Text2d, &mut Visibility),
         (With<OverlayText>, Without<ScoreText>, Without<OverlayPanel>),
@@ -70,10 +55,6 @@ pub fn update_ui(
         (With<OverlayPanel>, Without<OverlayText>, Without<ScoreText>),
     >,
 ) {
-    if let Some(mut score_text) = score_query.iter_mut().next() {
-        score_text.0 = format!("Score: {}", score.value);
-    }
-
     let show_overlay = matches!(state.get(), AppState::Won | AppState::GameOver);
 
     if let Some(mut panel_vis) = panel_query.iter_mut().next() {
@@ -91,11 +72,11 @@ pub fn update_ui(
             }
             AppState::Won => {
                 *visibility = Visibility::Visible;
-                overlay_text.0 = format!("You Win!\nScore: {}\n\nR to restart", score.value);
+                overlay_text.0 = "You Win!\nR to restart".to_owned();
             }
             AppState::GameOver => {
                 *visibility = Visibility::Visible;
-                overlay_text.0 = format!("Game Over\nScore: {}\n\nR to restart", score.value);
+                overlay_text.0 = "Game Over\nR to restart".to_owned();
             }
         }
     }

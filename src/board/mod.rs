@@ -5,7 +5,7 @@ mod systems;
 use crate::input::InputSet;
 use crate::states::AppState;
 use bevy::prelude::*;
-use resources::{Board, Score};
+use resources::Board;
 use systems::{process_turn, spawn_initial_tiles};
 
 pub struct BoardPlugin;
@@ -13,7 +13,6 @@ pub struct BoardPlugin;
 impl Plugin for BoardPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<Board>()
-            .init_resource::<Score>()
             .add_systems(Startup, spawn_initial_tiles)
             .add_systems(
                 Update,

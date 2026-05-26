@@ -14,21 +14,6 @@ impl Board {
     }
 }
 
-#[derive(Resource, Debug, Default)]
-pub struct Score {
-    pub value: u32,
-}
-
-impl Score {
-    pub fn add(&mut self, points: u32) {
-        self.value += points;
-    }
-
-    pub fn reset(&mut self) {
-        self.value = 0;
-    }
-}
-
 pub fn has_moves(grid: &[[Option<u32>; BOARD_SIZE]; BOARD_SIZE]) -> bool {
     for row in 0..BOARD_SIZE {
         for col in 0..BOARD_SIZE {

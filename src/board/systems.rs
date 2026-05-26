@@ -1,5 +1,5 @@
 // src/board/systems.rs
-use crate::board::resources::{has_2048, has_moves, Board, Score, BOARD_SIZE};
+use crate::board::resources::{has_2048, has_moves, Board, BOARD_SIZE};
 use crate::components::{Position, Tile};
 use crate::input::resources::Direction;
 use crate::states::AppState;
@@ -25,7 +25,6 @@ pub fn process_turn(
     mut commands: Commands,
     mut direction: ResMut<Direction>,
     mut board: ResMut<Board>,
-    mut score: ResMut<Score>,
     state: Res<State<AppState>>,
     mut next_state: ResMut<NextState<AppState>>,
     query: Query<(Entity, &Position, &Tile)>,
@@ -38,7 +37,6 @@ pub fn process_turn(
             commands.entity(entity).despawn();
         }
         board.clear();
-        score.reset();
         if *state.get() != AppState::InGame {
             next_state.set(AppState::InGame);
         }
@@ -57,14 +55,13 @@ pub fn process_turn(
         grid[pos.row][pos.col] = Some(tile.value);
     }
 
-    let (new_grid, points, moved) = apply_move(&grid, dir);
+    let (new_grid, _, moved) = apply_move(&grid, dir);
 
     if !moved {
         *direction = Direction::None;
         return;
     }
 
-    score.add(points);
     despawn_all_tiles(&mut commands, &board);
     spawn_tiles_from_grid(&mut commands, &new_grid, &mut board, &asset_server);
 
